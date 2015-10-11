@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+
+{% block content %}
+{% for post in stream %}
+	<article>
+		<h2>
+			<a href="{{ url_for('stream', username=post.user.username) }}">{{ post.user.username }}</a>
+		</h2>
+		<i class="clock"></i><time data-time="{{ post.timestamp }}" class="distime" datetime="{{ post.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}">{{ post.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</time> <a href="{{ url_for('view_post', post_id=post.id) }}" class="view">View<a/>
+				<div class="post"> 
+					<div style = "width: 640px; height: 480px"id="{{post.id}}"></div>
+<script>
+	var platform = new H.service.Platform({
+		app_id: 'evk3TrU4UcresAseG8Da',
+		app_code: 'z4yYohROherMZ57eHTsQUg'
+	}),
+	maptileService = platform.getMapTileService({'type': 'base'});
+
+	var router = platform.getRoutingService();
+
+	var maptypes = platform.createDefaultLayers(256,null);
+	var map = new H.Map(
+			document.getElementById({{post.id}}),
+			maptypes.normal.map,
+			{
+				zoom:10,
+				center: { lng: 13.4, lat: 52.51 }
+			});
+	window.addEventListener('resize',function() {map.getViewPort().resize(); });
+
+	var polygon = null, paintReady = true;
+	var polystrip = new H.geo.Strip();
+
+
+	var ui = H.ui.UI.createDefault(map, maptypes);
+
+	platform.configure(H.map.render.panorama.RenderEngine);
+	var points = [ {{ post.route }} ];
+	for(var i = 0; i < points.length; i+=3){
+		polystrip.pushLatLngAlt(points[i], points[i+1],points[i+2]);
+	}
+	console.log(polystrip);
+	polygon = new H.map.Polygon(
+			polystrip, {
+				sytle: {
+					strokeColor: "#f00",
+					lineWidth: 1,
+					fillColor:'rgba(0,0,0,0)'
+				}
+			}
+			);
+	if(polygon)
+	map.addObject(polygon);
+</script>
+					
+					{{ post.content }}
+				</div>
+	</article>
+{% endfor %}
+{% endblock %}
